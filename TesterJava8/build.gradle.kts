@@ -5,6 +5,7 @@ plugins {
 
 repositories {
     mavenLocal()
+    mavenCentral()
     maven { url = uri("https://repo.txmc.me/releases") }
 }
 
