@@ -30,12 +30,11 @@ tasks.shadowJar {
 //        )
 //    }
     includeEmptyDirs = false
-    minimize()
 }
 
 dependencies {
     implementation("org.javassist:javassist:3.28.0-GA")
-    if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
+    if (JavaVersion.current() == JavaVersion.VERSION_1_8) { //Make sure that gradle doesn't throw 10000 errors and die if we try to compile on java 8
         compileOnly(files(Jvm.current().toolsJar))
         println("Including the tools jar")
     }
@@ -50,6 +49,7 @@ tasks.shadowJar {
 group = "me.txmc"
 version = "1.0-SNAPSHOT"
 description = "Add mixins at runtime"
+version = "1.0-BETA"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType<JavaCompile> {
