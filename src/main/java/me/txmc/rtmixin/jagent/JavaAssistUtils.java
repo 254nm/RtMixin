@@ -24,7 +24,7 @@ public class JavaAssistUtils {
                 break;
         }
     }
-    public static void appendBoiler(CtBehavior behavior, String paramsName, String ciName, StringBuilder sb) throws Throwable {
+    public static void appendBoiler(CtBehavior behavior, String paramsName, String ciName, StringBuilder sb) throws Throwable { //TODO Dont add the param array if there are no params
         int paramsLen = behavior.getParameterTypes().length;
         sb.append("java.lang.Object[] ").append(paramsName).append(" = new java.lang.Object[").append(paramsLen).append("];\n");
         for (int i = 0; i < paramsLen; i++) {

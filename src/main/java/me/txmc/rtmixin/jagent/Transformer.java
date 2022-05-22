@@ -23,12 +23,12 @@ public class Transformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
         if (classBeingRedefined == null || AgentMain.beingRedefined == null) return classfileBuffer;
         if (AgentMain.beingRedefined == classBeingRedefined) {
-            try {
-                String paramsName = Utils.genRandomString(8);
-                String ciName = Utils.genRandomString(8);
+            try { //TODO Clean up code and add support for the <clinit> block
                 clp.appendClassPath(new LoaderClassPath(loader));
                 CtClass cc = clp.get(classBeingRedefined.getName());
                 for (Method tweakMethod : AgentMain.methods) {
+                    String paramsName = Utils.genRandomString(8);
+                    String ciName = Utils.genRandomString(8);
                     if (tweakMethod.isAnnotationPresent(Inject.class)) {
                         Inject inject = tweakMethod.getAnnotation(Inject.class);
                         StringBuilder src = new StringBuilder();
@@ -64,7 +64,7 @@ public class Transformer implements ClassFileTransformer {
                 return cc.toBytecode();
             } catch (Throwable t) {
                 t.printStackTrace();
-                System.out.println("Failed to instrument class " + className);
+                System.out.println("[RtMixin] Failed to instrument class " + className);
             }
         }
         return classfileBuffer;

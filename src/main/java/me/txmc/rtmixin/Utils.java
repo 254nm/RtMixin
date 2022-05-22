@@ -73,6 +73,7 @@ public class Utils {
         return !_class.getName().startsWith("me.txmc.rtmixin");
     }
 
+    //There are 10 fromPrimitive methods here because for some reason primitives aren't objects even tho everything in java is supposed to be an object
     public static Object fromPrimitive(byte p) {
         return p;
     }
