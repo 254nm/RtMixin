@@ -1,9 +1,9 @@
 rootProject.name = "RtMixin"
 
+include(":RtMixin", ":JavaMVLoader", "Tests")
+
 pluginManagement {
     repositories {
         gradlePluginPortal()
     }
 }
-include(":TesterJava8")
-//include(":Java9Loader")

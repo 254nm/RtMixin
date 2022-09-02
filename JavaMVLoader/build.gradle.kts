@@ -24,9 +24,9 @@ tasks.shadowJar {
     minimize()
 }
 
-group = "me.l2x9"
+group = "me.txmc"
 version = "1.0-SNAPSHOT"
-description = "L2X9RebootCore"
+description = "Runtime mixin multi version agent loader"
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"

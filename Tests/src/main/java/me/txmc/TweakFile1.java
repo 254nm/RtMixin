@@ -43,4 +43,8 @@ public class TweakFile1 {
     public static String modifyReplaceTest(CallbackInfo ci) {
         return "If your seeing this method replacing works\n\n\n\n\n";
     }
+    @Replace(info = @MethodInfo(_class = TestClass.class, sig = String.class, name = "privateTest", rtype = void.class))
+    public static void modifyPrivateTest(CallbackInfo ci) {
+        System.out.println("This was called insteds o f private meth");
+    }
 }

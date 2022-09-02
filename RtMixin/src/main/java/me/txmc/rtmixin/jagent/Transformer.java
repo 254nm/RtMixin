@@ -10,6 +10,7 @@ import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
+import java.util.HashMap;
 
 /**
  * @author 254n_m
@@ -18,6 +19,16 @@ import java.security.ProtectionDomain;
  */
 public class Transformer implements ClassFileTransformer {
     private final ClassPool clp = ClassPool.getDefault();
+    private final HashMap<String, String> primitiveMap = new HashMap<String, String>() {{
+        put("byte", "(byte)-1;");
+        put("short", "(short)-1;");
+        put("int", "(int)-1;");
+        put("long", "(long)-1;");
+        put("float", "(float)-1;");
+        put("double", "(double)-1;");
+        put("boolean", "false;");
+        put("char", "\\u0000;");
+    }};
 
     @Override
     public byte[] transform(ClassLoader loader, String className, Class<?> classBeingRedefined, ProtectionDomain protectionDomain, byte[] classfileBuffer) throws IllegalClassFormatException {
@@ -42,8 +53,12 @@ public class Transformer implements ClassFileTransformer {
                             CtMethod method = cc.getMethod(inject.info().name(), desc);
                             JavaAssistUtils.appendBoiler(method, paramsName, ciName, src);
                             src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
-                            String ret = (method.getReturnType() == CtClass.voidType) ? ";" : "null;";
-                            src.append("if (").append(ciName).append(".isCancel()) return ").append(ret);
+                            if (!method.getReturnType().isPrimitive()) {
+                                String ret = (method.getReturnType() == CtClass.voidType) ? ";" : "null;";
+                                src.append("if (").append(ciName).append(".isCancel()) return ").append(ret);
+                            } else {
+                                src.append("if (").append(ciName).append(".isCancel()) return ").append(primitiveMap.get(method.getReturnType().getName()));
+                            }
                             JavaAssistUtils.injectCode(method, inject.at().pos(), src.toString(), inject.at().line());
                         }
                     } else if (tweakMethod.isAnnotationPresent(Replace.class)) {

@@ -17,6 +17,14 @@ public class TestClass {
         for (int i = 0; i < 5; i++) {
             System.out.println();
         }
+        privateTest("[PRIVATE] " + test);
+    }
+    private void privateTest(String test) {
+        System.out.println("The test string is " + test);
+        System.out.println("Private Test method");
+        for (int i = 0; i < 5; i++) {
+            System.out.println();
+        }
     }
 
     public String replaceTest() {

@@ -11,18 +11,12 @@ repositories {
 
 dependencies {
     implementation("org.javassist:javassist:3.28.0-GA")
-    implementation(project(":"))
+    implementation(project(":RtMixin"))
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
         compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
     }
     compileOnly("org.projectlombok:lombok:1.18.24")
     annotationProcessor("org.projectlombok:lombok:1.18.22")
-}
-
-tasks.processResources {
-    from("src/main/resources")
-    includeEmptyDirs = false
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 tasks.shadowJar {

@@ -6,7 +6,7 @@ public class Main {
     public static void main(String[] args) {
         RtMixin.attachAgent().orElseThrow(NullPointerException::new);
         RtMixin.processMixins(TweakFile1.class);
-        RtMixin.processMixins(TweakFile2.class);
+//        RtMixin.processMixins(TweakFile2.class);
         new Main().init();
     }
 

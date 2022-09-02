@@ -20,7 +20,7 @@ public class Java9Attacher implements Attacher {
     public void attach(String pid) throws Throwable {
         File tempJar = new File(".", "Java9AgentLoader.jar");
         if (tempJar.exists()) tempJar.delete();
-        Files.copy(getClass().getClassLoader().getResourceAsStream("Java9Loader-1.0-SNAPSHOT-all.jar"), tempJar.toPath());
+        Files.copy(getClass().getClassLoader().getResourceAsStream("Java9Loader-1.0-SNAPSHOT-all.notjar"), tempJar.toPath());
         String javaPath = System.getProperty("java.home") + "/bin/java"; //The java in $PATH might be a different version than the one we want
         //Spawn a new java process to attach the java agent to our current JVM because the JVM doesn't allow us to directly attach our own JVM
         Process process = new ProcessBuilder(javaPath, "-jar", tempJar.getAbsolutePath(), pid, getSelf(RtMixin.class).getAbsolutePath()).start();
