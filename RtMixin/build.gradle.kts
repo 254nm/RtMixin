@@ -36,7 +36,7 @@ tasks.shadowJar {
 
 
 group = "me.txmc"
-version = "1.4-BETA"
+version = "1.5.3-BETA"
 description = "Add mixins at runtime"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 

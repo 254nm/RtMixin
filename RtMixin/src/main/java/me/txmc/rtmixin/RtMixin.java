@@ -7,7 +7,10 @@ import me.txmc.rtmixin.jagent.AgentMain;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.management.ManagementFactory;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.jar.JarFile;
+import java.util.stream.Collectors;
 
 /**
  * @author 254n_m
@@ -27,9 +30,7 @@ public class RtMixin {
         String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
         String pid = nameOfRunningVM.substring(0, nameOfRunningVM.indexOf('@'));
         try {
-            if (inst == null) {
-                return attachAgent(pid);
-            } else return Optional.of(inst);
+            return attachAgent(pid);
         } catch (Throwable e) {
             e.printStackTrace();
             return Optional.empty();
@@ -43,6 +44,11 @@ public class RtMixin {
      * @return If successful an {@link Optional} with a reference to {@link Instrumentation} otherwise an empty optional
      */
     public static Optional<Instrumentation> attachAgent(String pid) throws Throwable {
+        if (AgentMain.getInst() != null) {
+            StackTraceElement element = Thread.currentThread().getStackTrace()[3];
+            inst.appendToSystemClassLoaderSearch(new JarFile(Utils.getSelf(Class.forName(element.getClassName()))));
+            return Optional.ofNullable(AgentMain.getInst());
+        }
         Attacher attacher = null;
         if (getVersion() >= 9) {
             attacher = new Java9Attacher();
