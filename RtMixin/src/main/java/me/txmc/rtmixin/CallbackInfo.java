@@ -11,12 +11,18 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @RequiredArgsConstructor
 public class CallbackInfo {
+    /**
+     * The parameters that where passed to the method being mixed into
+     */
     private final Object[] parameters;
+    /**
+     * The instance of the object being mixed into
+     */
     private final Object self;
     private boolean cancel = false;
 
     /**
-     * Will return the method
+     * Will cause the method being mixed into to stop execution by returning
      */
     public void cancel() {
         cancel = true;

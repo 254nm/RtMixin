@@ -21,7 +21,6 @@ dependencies {
 }
 
 tasks.shadowJar {
-//    from("src/main/resources").include("*")
     manifest {
         attributes(
             "Manifest-Version" to "1.0",
@@ -32,7 +31,6 @@ tasks.shadowJar {
             "Can-Set-Native-Method-Prefix" to "true"
         )
     }
-//    includeEmptyDirs = false
 }
 
 

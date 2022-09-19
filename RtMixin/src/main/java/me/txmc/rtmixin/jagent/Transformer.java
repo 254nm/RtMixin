@@ -28,6 +28,7 @@ public class Transformer implements ClassFileTransformer {
         put("double", "(double)-1;");
         put("boolean", "false;");
         put("char", "\\u0000;");
+        put("void", ";");
     }};
 
     @Override

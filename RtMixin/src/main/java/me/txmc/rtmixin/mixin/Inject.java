@@ -18,13 +18,12 @@ public @interface Inject {
 
 
     /**
-     * {@code @MethodInfo}
-     * The information about the method being modified
+     * @return The information about the method being modified
      */
     MethodInfo info();
 
     /**
-     * {@code @At} Meta data about where to place the method call
+     * @return Metadata about where to place the method call
      */
     At at();
 }
