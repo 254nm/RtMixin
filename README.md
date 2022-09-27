@@ -22,7 +22,7 @@ repositories {
 ### Dependencies block
 ```kotlin
 dependencies {
-    implementation("me.txmc:rtmixin:1.3-BETA")
+    implementation("me.txmc:rtmixin:1.5.2-BETA")
     if (JavaVersion.current() == JavaVersion.VERSION_1_8) {
         compileOnly(files(org.gradle.internal.jvm.Jvm.current().toolsJar))
     }
