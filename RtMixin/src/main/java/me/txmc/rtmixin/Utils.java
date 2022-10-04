@@ -109,6 +109,7 @@ public class Utils {
     public static Object fromPrimitive(Object p) {
         return p;
     }
+
     public static String genRandomString(int targetStrLen) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         StringBuilder buf = new StringBuilder(targetStrLen);
@@ -116,5 +117,28 @@ public class Utils {
             buf.append((char) random.nextInt(97, 122));
         }
         return buf.toString();
+    }
+
+    private static String getDescriptorForClass(Class<?> _class) {
+        if (_class.isPrimitive()) {
+            if (_class == byte.class) return "B";
+            if (_class == char.class) return "C";
+            if (_class == double.class) return "D";
+            if (_class == float.class) return "F";
+            if (_class == int.class) return "I";
+            if (_class == long.class) return "J";
+            if (_class == short.class) return "S";
+            if (_class == boolean.class) return "Z";
+            if (_class == void.class) return "V";
+        }
+        if (_class.isArray()) return _class.getName().replace('.', '/');
+        return ('L' + _class.getName() + ';').replace('.', '/');
+    }
+
+    public static String getDescriptor(Class<?>[] paramTypes, Class<?> returnType) {
+        StringBuilder sb = new StringBuilder("(");
+        for (Class<?> c : paramTypes) sb.append(getDescriptorForClass(c));
+        sb.append(')');
+        return sb.append(getDescriptorForClass(returnType)).toString();
     }
 }

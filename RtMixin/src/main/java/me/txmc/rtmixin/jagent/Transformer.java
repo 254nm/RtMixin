@@ -4,6 +4,7 @@ import javassist.*;
 import javassist.bytecode.Descriptor;
 import me.txmc.rtmixin.Utils;
 import me.txmc.rtmixin.mixin.Inject;
+import me.txmc.rtmixin.mixin.MethodInfo;
 import me.txmc.rtmixin.mixin.Replace;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -39,41 +40,48 @@ public class Transformer implements ClassFileTransformer {
                 clp.appendClassPath(new LoaderClassPath(loader));
                 CtClass cc = clp.get(classBeingRedefined.getName());
                 for (Method tweakMethod : AgentMain.methods) {
-                    String paramsName = Utils.genRandomString(8);
-                    String ciName = Utils.genRandomString(8);
-                    if (tweakMethod.isAnnotationPresent(Inject.class)) {
-                        Inject inject = tweakMethod.getAnnotation(Inject.class);
-                        StringBuilder src = new StringBuilder();
-                        if (inject.info().name().equals("<init>")) {
-                            CtConstructor constructor = cc.getDeclaredConstructor(JavaAssistUtils.fromArr(inject.info().sig(), clp));
-                            JavaAssistUtils.appendBoiler(constructor, paramsName, ciName, src);
-                            src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
-                            JavaAssistUtils.injectCode(constructor, inject.at().pos(), src.toString(), inject.at().line());
-                        } else {
-                            String desc = Descriptor.ofMethod(clp.get(inject.info().rtype().getName()), JavaAssistUtils.fromArr(inject.info().sig(), clp));
-                            CtMethod method = cc.getMethod(inject.info().name(), desc);
-                            JavaAssistUtils.appendBoiler(method, paramsName, ciName, src);
-                            src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
-                            if (!method.getReturnType().isPrimitive()) {
-                                String ret = (method.getReturnType() == CtClass.voidType) ? ";" : "null;";
-                                src.append("if (").append(ciName).append(".isCancel()) return ").append(ret);
+                    try {
+                        String paramsName = Utils.genRandomString(8);
+                        String ciName = Utils.genRandomString(8);
+                        if (tweakMethod.isAnnotationPresent(Inject.class)) {
+                            Inject inject = tweakMethod.getAnnotation(Inject.class);
+                            StringBuilder src = new StringBuilder();
+                            if (inject.info().name().equals("<init>")) {
+                                CtConstructor constructor = cc.getDeclaredConstructor(JavaAssistUtils.fromArr(inject.info().sig(), clp));
+                                JavaAssistUtils.appendBoiler(constructor, paramsName, ciName, src);
+                                src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
+                                JavaAssistUtils.injectCode(constructor, inject.at().pos(), src.toString(), inject.at().line());
                             } else {
-                                src.append("if (").append(ciName).append(".isCancel()) return ").append(primitiveMap.get(method.getReturnType().getName()));
+                                String desc = Descriptor.ofMethod(clp.get(inject.info().rtype().getName()), JavaAssistUtils.fromArr(inject.info().sig(), clp));
+                                CtMethod method = cc.getMethod(inject.info().name(), desc);
+                                JavaAssistUtils.appendBoiler(method, paramsName, ciName, src);
+                                src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
+                                if (!method.getReturnType().isPrimitive()) {
+                                    String ret = (method.getReturnType() == CtClass.voidType) ? ";" : "null;";
+                                    src.append("if (").append(ciName).append(".isCancel()) return ").append(ret);
+                                } else {
+                                    src.append("if (").append(ciName).append(".isCancel()) return ").append(primitiveMap.get(method.getReturnType().getName()));
+                                }
+                                JavaAssistUtils.injectCode(method, inject.at().pos(), src.toString(), inject.at().line());
                             }
-                            JavaAssistUtils.injectCode(method, inject.at().pos(), src.toString(), inject.at().line());
+                        } else if (tweakMethod.isAnnotationPresent(Replace.class)) {
+                            Replace replace = tweakMethod.getAnnotation(Replace.class);
+                            CtMethod method = (replace.info().sig().length == 0) ? cc.getDeclaredMethod(replace.info().name()) : cc.getDeclaredMethod(replace.info().name(), JavaAssistUtils.fromArr(replace.info().sig(), clp));
+                            StringBuilder src = new StringBuilder();
+                            src.append("{ \n");
+                            JavaAssistUtils.appendBoiler(method, paramsName, ciName, src);
+                            if (method.getReturnType() == CtClass.voidType) {
+                                src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n }");
+                            } else {
+                                src.append("return ").append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n }");
+                            }
+                            method.setBody(src.toString());
                         }
-                    } else if (tweakMethod.isAnnotationPresent(Replace.class)) {
-                        Replace replace = tweakMethod.getAnnotation(Replace.class);
-                        CtMethod method = (replace.info().sig().length == 0) ? cc.getDeclaredMethod(replace.info().name()) : cc.getDeclaredMethod(replace.info().name(), JavaAssistUtils.fromArr(replace.info().sig(), clp));
-                        StringBuilder src = new StringBuilder();
-                        src.append("{ \n");
-                        JavaAssistUtils.appendBoiler(method, paramsName, ciName, src);
-                        if (method.getReturnType() == CtClass.voidType) {
-                            src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n }");
-                        } else {
-                            src.append("return ").append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n }");
-                        }
-                        method.setBody(src.toString());
+                    } catch (NotFoundException e) {
+                        MethodInfo info = (tweakMethod.isAnnotationPresent(Inject.class)) ? tweakMethod.getAnnotation(Inject.class).info() : tweakMethod.getAnnotation(Replace.class).info();
+                        String desc = info.name().concat(Utils.getDescriptor(info.sig(), (info.name().equals("<init>") ? info._class() : info.rtype())));
+                        String clName = info._class().getName();
+                        System.out.printf("[RtMixin] The method %s could not be found in class %s\n", desc, clName);
                     }
                 }
                 cc.detach();
