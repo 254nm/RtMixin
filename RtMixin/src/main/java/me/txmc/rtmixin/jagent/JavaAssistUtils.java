@@ -1,7 +1,15 @@
 package me.txmc.rtmixin.jagent;
 
 import javassist.*;
+import javassist.bytecode.Descriptor;
+import me.txmc.rtmixin.Utils;
 import me.txmc.rtmixin.mixin.At;
+import me.txmc.rtmixin.mixin.Inject;
+import me.txmc.rtmixin.mixin.MethodInfo;
+import me.txmc.rtmixin.mixin.Replace;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 
 /**
  * @author 254n_m
@@ -24,18 +32,21 @@ public class JavaAssistUtils {
                 break;
         }
     }
-    public static void appendBoiler(CtBehavior behavior, String paramsName, String ciName, StringBuilder sb) throws Throwable { //TODO Dont add the param array if there are no params
+    public static void appendBoiler(CtBehavior behavior, String paramsName, String ciName, StringBuilder sb) throws Throwable {
         int paramsLen = behavior.getParameterTypes().length;
-        sb.append("java.lang.Object[] ").append(paramsName).append(" = new java.lang.Object[").append(paramsLen).append("];\n");
-        for (int i = 0; i < paramsLen; i++) {
-            sb.append(paramsName).append("[").append(i).append("] = me.txmc.rtmixin.Utils.fromPrimitive($").append(i + 1).append(");\n");
+        if (paramsLen > 0) {
+            sb.append("java.lang.Object[] ").append(paramsName).append(" = new java.lang.Object[").append(paramsLen).append("];\n");
+            for (int i = 0; i < paramsLen; i++) {
+                sb.append(paramsName).append("[").append(i).append("] = me.txmc.rtmixin.Utils.fromPrimitive($").append(i + 1).append(");\n");
+            }
         }
+        String params = (paramsLen == 0) ? "null" : paramsName;
         if (behavior instanceof CtMethod) {
             CtMethod method = (CtMethod) behavior;
-            String ret = (Modifier.isStatic(method.getModifiers())) ? "null" : "this";
-            sb.append("me.txmc.rtmixin.CallbackInfo ").append(ciName).append(" = new me.txmc.rtmixin.CallbackInfo(").append(paramsName).append(", ").append(ret).append(");\n");
+            String self = (Modifier.isStatic(method.getModifiers())) ? "null" : "this";
+            sb.append("me.txmc.rtmixin.CallbackInfo ").append(ciName).append(" = new me.txmc.rtmixin.CallbackInfo(").append(params).append(", ").append(self).append(");\n");
         } else if (behavior instanceof CtConstructor) {
-            sb.append("me.txmc.rtmixin.CallbackInfo ").append(ciName).append(" = new me.txmc.rtmixin.CallbackInfo(").append(paramsName).append(", this);\n");
+            sb.append("me.txmc.rtmixin.CallbackInfo ").append(ciName).append(" = new me.txmc.rtmixin.CallbackInfo(").append(params).append(", this);\n");
         }
     }
     public static CtClass[] fromArr(Class<?>[] arr, ClassPool classPool) throws Throwable {
