@@ -11,9 +11,9 @@ public class Main {
                 vm.detach();
             } catch (Throwable t) {
                 t.printStackTrace();
-                System.exit(0);
+                System.exit(1);
             }
-            System.exit(1);
+            System.exit(0);
         }
     }
 }
