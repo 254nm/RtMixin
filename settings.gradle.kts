@@ -1,6 +1,6 @@
 rootProject.name = "RtMixin"
 
-include(":RtMixin", ":JavaMVLoader", "Tests")
+include(":RtMixin", ":JavaMVLoader", ":Example")
 
 pluginManagement {
     repositories {
