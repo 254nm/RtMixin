@@ -1,6 +1,5 @@
 package me.txmc.rtmixin.jagent;
 
-import lombok.SneakyThrows;
 import me.txmc.rtmixin.RtMixin;
 import me.txmc.rtmixin.Utils;
 import me.txmc.rtmixin.mixin.Inject;
@@ -8,7 +7,6 @@ import me.txmc.rtmixin.mixin.MethodInfo;
 import me.txmc.rtmixin.mixin.Replace;
 
 import java.lang.instrument.Instrumentation;
-import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.jar.JarFile;
@@ -25,39 +23,39 @@ public class AgentMain {
     private static Instrumentation inst;
 
     public static void premain(String agentOps, Instrumentation inst) {
-
     }
 
-    @SneakyThrows
+
     public static void agentmain(String agentOps, Instrumentation inst) {
-        AgentMain.inst = inst;
-        inst.appendToSystemClassLoaderSearch(new JarFile(Utils.getSelf(RtMixin.class)));
-        inst.addTransformer(new Transformer(), true);
-        Class<?>[] alreadyLoaded = Arrays.stream(inst.getAllLoadedClasses()).filter(Objects::nonNull).filter(inst::isModifiableClass).filter(Utils::isNotJvmClass).toArray(Class<?>[]::new);
-        for (Class<?> c : alreadyLoaded) doMixins(c);
+        try {
+            AgentMain.inst = inst;
+            inst.appendToSystemClassLoaderSearch(new JarFile(Utils.getSelf(RtMixin.class)));
+            inst.addTransformer(new Transformer(), true);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
     }
 
-    public static void doMixins(Class<?> _class) { //TODO make this method not redo every mixin every time while supporting mixins from multiple tweak classes
-        if (!Utils.hasMixins(_class)) return;
+    public static void doMixins(Class<?> tweakClass) { //TODO make this method not redo every mixin every time while supporting mixins from multiple tweak classes & multiple different classes being tweaked
+        if (!Utils.hasMixins(tweakClass)) return;
         try {
-            Method[] methods = Arrays.stream(_class.getDeclaredMethods()).filter(Utils::isMixinMethod).toArray(Method[]::new);
-            for (Method method : methods) {
-                MethodInfo info = (method.isAnnotationPresent(Inject.class)) ? method.getAnnotation(Inject.class).info() : method.getAnnotation(Replace.class).info();
+            Method[] tweakMethods = Arrays.stream(tweakClass.getDeclaredMethods()).filter(Utils::isMixinMethod).toArray(Method[]::new);
+            for (Method tweakMethod : tweakMethods) {
+                MethodInfo info = (tweakMethod.isAnnotationPresent(Inject.class)) ? tweakMethod.getAnnotation(Inject.class).info() : tweakMethod.getAnnotation(Replace.class).info();
                 if (!mixinCache.containsKey(info._class())) {
                     mixinCache.put(info._class(), new ArrayList<>());
-                    mixinCache.get(info._class()).add(method);
-                } else mixinCache.get(info._class()).add(method);
+                    mixinCache.get(info._class()).add(tweakMethod);
+                } else {
+                    List<Method> clMethods = mixinCache.get(info._class());
+                    if (!clMethods.contains(tweakMethod)) clMethods.add(tweakMethod);
+                }
             }
             for (Map.Entry<Class<?>, List<Method>> entry : mixinCache.entrySet()) {
-                try {
-                    AgentMain.methods = entry.getValue().toArray(new Method[0]);
-                    AgentMain.beingRedefined = entry.getKey();
-                    getInst().retransformClasses(entry.getKey());
-                    AgentMain.methods = null;
-                    AgentMain.beingRedefined = null;
-                } catch (UnmodifiableClassException e) {
-                    e.printStackTrace();
-                }
+                AgentMain.methods = entry.getValue().toArray(new Method[0]);
+                AgentMain.beingRedefined = entry.getKey();
+                getInst().retransformClasses(entry.getKey());
+                AgentMain.methods = null;
+                AgentMain.beingRedefined = null;
             }
 
         } catch (Throwable t) {
