@@ -5,6 +5,7 @@ import me.txmc.rtmixin.attach.Attacher;
 import me.txmc.rtmixin.jagent.AgentMain;
 
 import java.io.File;
+import java.io.InputStream;
 import java.lang.instrument.Instrumentation;
 import java.nio.file.Files;
 
@@ -25,6 +26,12 @@ public class Java9Attacher implements Attacher {
         //Spawn a new java process to attach the java agent to our current JVM because the JVM doesn't allow us to directly attach our own JVM
         Process process = new ProcessBuilder(javaPath, "-jar", tempJar.getAbsolutePath(), pid, getSelf(RtMixin.class).getAbsolutePath()).start();
         process.waitFor();
+        if (process.getErrorStream().available() > 0) {
+            InputStream is = process.getErrorStream();
+            byte[] outputBS = new byte[is.available()];
+            is.read(outputBS);
+            System.out.println("[RtMixin J9 Attach] Error Stream:\n".concat(new String(outputBS)));
+        }
         tempJar.delete();
         inst = AgentMain.getInst();
     }
