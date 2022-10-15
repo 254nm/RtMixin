@@ -1,5 +1,10 @@
 import org.gradle.internal.jvm.Jvm
 
+group = "me.txmc"
+version = "1.5.4-BETA"
+description = "Add mixins at runtime"
+java.sourceCompatibility = JavaVersion.VERSION_1_8
+
 plugins {
     java
     id("com.github.johnrengelman.shadow") version "7.1.2"
@@ -32,13 +37,6 @@ tasks.shadowJar {
         )
     }
 }
-
-
-
-group = "me.txmc"
-version = "1.5.3-BETA"
-description = "Add mixins at runtime"
-java.sourceCompatibility = JavaVersion.VERSION_1_8
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
