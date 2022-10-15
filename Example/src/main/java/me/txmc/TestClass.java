@@ -14,17 +14,11 @@ public class TestClass {
     public void test(String test) {
         System.out.println("The test string is " + test);
         System.out.println("Test method");
-        for (int i = 0; i < 5; i++) {
-            System.out.println();
-        }
         privateTest("[PRIVATE] " + test);
     }
     private void privateTest(String test) {
         System.out.println("The test string is " + test);
         System.out.println("Private Test method");
-        for (int i = 0; i < 5; i++) {
-            System.out.println();
-        }
     }
 
     public String replaceTest() {
@@ -33,8 +27,5 @@ public class TestClass {
 
     public static void staticTest(String test) {
         System.out.println("This is the static test");
-        for (int i = 0; i < 5; i++) {
-            System.out.println();
-        }
     }
 }
