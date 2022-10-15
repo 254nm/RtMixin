@@ -3,6 +3,7 @@ package me.txmc.rtmixin.jagent;
 import javassist.*;
 import javassist.bytecode.Descriptor;
 import me.txmc.rtmixin.Utils;
+import me.txmc.rtmixin.mixin.At;
 import me.txmc.rtmixin.mixin.Inject;
 import me.txmc.rtmixin.mixin.MethodInfo;
 import me.txmc.rtmixin.mixin.Replace;
@@ -50,7 +51,7 @@ public class Transformer implements ClassFileTransformer {
                                 CtConstructor constructor = cc.getDeclaredConstructor(JavaAssistUtils.fromArr(inject.info().sig(), clp));
                                 JavaAssistUtils.appendBoiler(constructor, paramsName, ciName, src);
                                 src.append(tweakMethod.getDeclaringClass().getName()).append(".").append(tweakMethod.getName()).append("(").append(ciName).append(");\n");
-                                JavaAssistUtils.injectCode(constructor, inject.at().pos(), src.toString(), inject.at().line());
+                                JavaAssistUtils.injectCode(constructor, At.Position.TAIL, src.toString(), inject.at().line());
                             } else {
                                 String desc = Descriptor.ofMethod(clp.get(inject.info().rtype().getName()), JavaAssistUtils.fromArr(inject.info().sig(), clp));
                                 CtMethod method = cc.getMethod(inject.info().name(), desc);
