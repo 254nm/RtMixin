@@ -19,9 +19,9 @@ public class RtMixin {
     private static Instrumentation inst;
 
     /**
-     * This method will attempt to attach a java agent to the current JVM and expose {@link Instrumentation}
+     * This method will attempt to attach a java agent to the current JVM and expose Instrumentation
      *
-     * @return If successful an {@link Optional} with a reference to {@link Instrumentation} otherwise an empty optional
+     * @return Optional<Instrumentation>
      */
     public static Optional<Instrumentation> attachAgent() {
         String nameOfRunningVM = ManagementFactory.getRuntimeMXBean().getName();
@@ -39,11 +39,9 @@ public class RtMixin {
     /**
      * This method will attempt to attach a java agent to the JVM with the provided PID
      *
-     * @param pid The PID of the JVM to attach to
-     * @return If successful an {@link Optional} with a reference to {@link Instrumentation} otherwise an empty optional
+     * @return Optional<Instrumentation>
      */
     public static Optional<Instrumentation> attachAgent(String pid) throws Throwable {
-        if (AgentMain.getInst() != null) return Optional.of(AgentMain.getInst());
         Attacher attacher = null;
         if (getVersion() >= 9) {
             attacher = new Java9Attacher();
@@ -71,4 +69,3 @@ public class RtMixin {
         AgentMain.doMixins(_class);
     }
 }
-
