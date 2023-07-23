@@ -13,11 +13,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.METHOD)
 public @interface MethodInfo {
-    /**
-     * The class to modify
-     */
-    Class<?> _class();
-
 
     /**
      * The name of the method to modify

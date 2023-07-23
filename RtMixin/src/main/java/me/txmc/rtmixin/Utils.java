@@ -44,33 +44,12 @@ public class Utils {
         return null;
     }
 
-    public static boolean hasMixins(Class<?> _class) {
-        try {
-            for (Method method : _class.getDeclaredMethods()) {
-                if (isMixinMethod(method)) return true;
-            }
-            return false;
-        } catch (Throwable t) {
-            return false;
-        }
-    }
-
     public static boolean isMixinMethod(Method method) {
         if (!Modifier.isStatic(method.getModifiers()) && !Modifier.isPublic(method.getModifiers())) return false;
         if (method.isAnnotationPresent(Inject.class) || method.isAnnotationPresent(Replace.class)) {
             return method.getParameterCount() == 1 && method.getParameterTypes()[0].equals(CallbackInfo.class);
         }
         return false;
-    }
-
-    public static boolean isNotJvmClass(Class<?> _class) {
-        if (_class.getName().startsWith("java.")) return false;
-        if (_class.getName().startsWith("sun.")) return false;
-        if (_class.getName().startsWith("com.sun.")) return false;
-        if (_class.getName().startsWith("jdk.")) return false;
-        if (_class.getName().startsWith("javax.")) return false;
-        if (_class.getName().startsWith("com.azul")) return false;
-        return !_class.getName().startsWith("me.txmc.rtmixin");
     }
 
     //There are 10 fromPrimitive methods here because for some reason primitives aren't objects even tho everything in java is supposed to be an object

@@ -1,7 +1,7 @@
 import org.gradle.internal.jvm.Jvm
 
 group = "me.txmc"
-version = "1.5.4-BETA"
+version = "1.5.7-BETA"
 description = "Add mixins at runtime"
 java.sourceCompatibility = JavaVersion.VERSION_1_8
 

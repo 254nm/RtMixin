@@ -60,9 +60,7 @@ public class Transformer implements ClassFileTransformer {
                                 if (!method.getReturnType().isPrimitive()) {
                                     String ret = (method.getReturnType() == CtClass.voidType) ? ";" : "null;";
                                     src.append("if (").append(ciName).append(".isCancel()) return ").append(ret);
-                                } else {
-                                    src.append("if (").append(ciName).append(".isCancel()) return ").append(primitiveMap.get(method.getReturnType().getName()));
-                                }
+                                } else src.append("if (").append(ciName).append(".isCancel()) return ").append(primitiveMap.get(method.getReturnType().getName()));
                                 JavaAssistUtils.injectCode(method, inject.at().pos(), src.toString(), inject.at().line());
                             }
                         } else if (tweakMethod.isAnnotationPresent(Replace.class)) {
@@ -80,8 +78,8 @@ public class Transformer implements ClassFileTransformer {
                         }
                     } catch (NotFoundException e) {
                         MethodInfo info = (tweakMethod.isAnnotationPresent(Inject.class)) ? tweakMethod.getAnnotation(Inject.class).info() : tweakMethod.getAnnotation(Replace.class).info();
-                        String desc = info.name().concat(Utils.getDescriptor(info.sig(), (info.name().equals("<init>") ? info._class() : info.rtype())));
-                        String clName = info._class().getName();
+                        String desc = info.name().concat(Utils.getDescriptor(info.sig(), (info.name().equals("<init>") ? AgentMain.beingRedefined : info.rtype())));
+                        String clName = AgentMain.beingRedefined.getName();
                         System.out.printf("[RtMixin] The method %s could not be found in class %s\n", desc, clName);
                     }
                 }
